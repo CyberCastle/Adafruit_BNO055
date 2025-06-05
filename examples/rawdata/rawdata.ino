@@ -19,6 +19,7 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
+unsigned long last_sample = 0;  // tiempo del último muestreo
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -33,7 +34,10 @@ void setup(void)
 {
   Serial.begin(115200);
 
-  while (!Serial) delay(10);  // wait for serial port to open!
+  unsigned long serialTimeout = millis();
+  while (!Serial && (millis() - serialTimeout < 5000)) {
+    yield();
+  }
 
   Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
 
@@ -45,7 +49,7 @@ void setup(void)
     while(1);
   }
 
-  delay(1000);
+  last_sample = millis();
 
   /* Display the current temperature */
   int8_t temp = bno.getTemp();
@@ -67,6 +71,10 @@ void setup(void)
 /**************************************************************************/
 void loop(void)
 {
+  if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
+    return; // espera sin bloquear
+  }
+  last_sample = millis();
   // Possible vector values can be:
   // - VECTOR_ACCELEROMETER - m/s^2
   // - VECTOR_MAGNETOMETER  - uT
@@ -111,5 +119,5 @@ void loop(void)
   Serial.print(" Mag=");
   Serial.println(mag, DEC);
 
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  last_sample = millis();
 }

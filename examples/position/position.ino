@@ -16,12 +16,16 @@ double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outpu
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+unsigned long last_sample_us = 0;
 
 void setup(void)
 {
   Serial.begin(115200);
 
-  while (!Serial) delay(10);  // wait for serial port to open!
+  unsigned long serialTimeout = millis();
+  while (!Serial && (millis() - serialTimeout < 5000)) {
+    yield();
+  }
   
   if (!bno.begin())
   {
@@ -30,13 +34,16 @@ void setup(void)
   }
 
 
-  delay(1000);
+  last_sample_us = micros();
 }
 
 void loop(void)
 {
-  //
-  unsigned long tStart = micros();
+  if (micros() - last_sample_us < (BNO055_SAMPLERATE_DELAY_MS * 1000)) {
+    return;
+  }
+  last_sample_us = micros();
+  unsigned long tStart = last_sample_us;
   sensors_event_t orientationData , linearAccelData;
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   //  bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -68,10 +75,7 @@ void loop(void)
 
 
 
-  while ((micros() - tStart) < (BNO055_SAMPLERATE_DELAY_MS * 1000))
-  {
-    //poll until the next sample is ready
-  }
+  // fin de la muestra, vuelve inmediatamente
 }
 
 void printEvent(sensors_event_t* event) {
