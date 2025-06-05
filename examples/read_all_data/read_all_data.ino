@@ -29,6 +29,7 @@
 
 /* Set the delay between fresh samples */
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
+unsigned long last_sample = 0;  // tiempo del último muestreo
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -38,7 +39,10 @@ void setup(void)
 {
   Serial.begin(115200);
 
-  while (!Serial) delay(10);  // wait for serial port to open!
+  unsigned long serialTimeout = millis();
+  while (!Serial && (millis() - serialTimeout < 5000)) {
+    yield(); // espera sin bloquear el resto del sistema
+  }
 
   Serial.println("Orientation Sensor Test"); Serial.println("");
 
@@ -50,11 +54,15 @@ void setup(void)
     while (1);
   }
 
-  delay(1000);
+  last_sample = millis();
 }
 
 void loop(void)
 {
+  if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
+    return; // espera sin bloquear hasta el siguiente muestreo
+  }
+  last_sample = millis();
   //could add VECTOR_ACCELEROMETER, VECTOR_MAGNETOMETER,VECTOR_GRAVITY...
   sensors_event_t orientationData , angVelocityData , linearAccelData, magnetometerData, accelerometerData, gravityData;
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
@@ -89,7 +97,6 @@ void loop(void)
   Serial.println(mag);
 
   Serial.println("--");
-  delay(BNO055_SAMPLERATE_DELAY_MS);
 }
 
 void printEvent(sensors_event_t* event) {

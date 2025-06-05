@@ -32,6 +32,7 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
+unsigned long last_sample = 0;  // tiempo del último muestreo
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -56,7 +57,10 @@ void displaySensorDetails(void)
   Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
   Serial.println("------------------------------------");
   Serial.println("");
-  delay(500);
+  unsigned long t = millis();
+  while (millis() - t < 500) {
+    yield();
+  }
 }
 
 /**************************************************************************/
@@ -77,7 +81,7 @@ void setup(void)
     while(1);
   }
    
-  delay(1000);
+  last_sample = millis();
 
   /* Use external crystal for better accuracy */
   bno.setExtCrystalUse(true);
@@ -94,6 +98,10 @@ void setup(void)
 /**************************************************************************/
 void loop(void)
 {
+  if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
+    return;
+  }
+  last_sample = millis();
   /* Get a new sensor event */
   sensors_event_t event;
   bno.getEvent(&event);
@@ -143,6 +151,4 @@ void loop(void)
   Serial.print(F(", "));
   Serial.print(mag, DEC);
   Serial.println(F(""));
-
-  delay(BNO055_SAMPLERATE_DELAY_MS);
 }

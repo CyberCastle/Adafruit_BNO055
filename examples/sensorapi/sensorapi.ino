@@ -30,6 +30,7 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
+unsigned long last_sample = 0;  // tiempo del último muestreo
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -54,7 +55,10 @@ void displaySensorDetails(void)
   Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
   Serial.println("------------------------------------");
   Serial.println("");
-  delay(500);
+  unsigned long t = millis();
+  while (millis() - t < 500) {
+    yield();
+  }
 }
 
 /**************************************************************************/
@@ -78,7 +82,10 @@ void displaySensorStatus(void)
   Serial.print("System Error:  0x");
   Serial.println(system_error, HEX);
   Serial.println("");
-  delay(500);
+  unsigned long t = millis();
+  while (millis() - t < 500) {
+    yield();
+  }
 }
 
 /**************************************************************************/
@@ -122,7 +129,10 @@ void setup(void)
 {
   Serial.begin(115200);
 
-  while (!Serial) delay(10);  // wait for serial port to open!
+  unsigned long serialTimeout = millis();
+  while (!Serial && (millis() - serialTimeout < 5000)) {
+    yield();
+  }
 
   Serial.println("Orientation Sensor Test"); Serial.println("");
 
@@ -134,7 +144,7 @@ void setup(void)
     while(1);
   }
 
-  delay(1000);
+  last_sample = millis();
 
   /* Display some basic information on this sensor */
   displaySensorDetails();
@@ -153,6 +163,10 @@ void setup(void)
 /**************************************************************************/
 void loop(void)
 {
+  if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
+    return; // espera sin bloquear
+  }
+  last_sample = millis();
   /* Get a new sensor event */
   sensors_event_t event;
   bno.getEvent(&event);
@@ -173,7 +187,4 @@ void loop(void)
 
   /* New line for the next sample */
   Serial.println("");
-
-  /* Wait the specified delay before requesting next data */
-  delay(BNO055_SAMPLERATE_DELAY_MS);
 }
