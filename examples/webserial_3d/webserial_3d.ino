@@ -1,11 +1,11 @@
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
+
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
 /* Returns the IMU data as both a euler angles and quaternions as the WebSerial
    3D Model viewer at https://adafruit-3dmodel-viewer.glitch.me/ expects.
- 
+
    This driver uses the Adafruit unified sensor library (Adafruit_Sensor),
    which provides a common 'type' for sensor data and some helper functions.
 
@@ -80,12 +80,12 @@ void setup(void)
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-   
+
   last_sample = millis();
 
   /* Use external crystal for better accuracy */
   bno.setExtCrystalUse(true);
-   
+
   /* Display some basic information on this sensor */
   displaySensorDetails();
 }
@@ -128,7 +128,7 @@ void loop(void)
 
   /* The WebSerial 3D Model Viewer also expects data as roll, pitch, heading */
   imu::Quaternion quat = bno.getQuat();
-  
+
   Serial.print(F("Quaternion: "));
   Serial.print((float)quat.w(), 4);
   Serial.print(F(", "));

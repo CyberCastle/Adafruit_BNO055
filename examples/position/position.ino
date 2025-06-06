@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
+
 #include <Adafruit_BNO055.h>
 
 double xPos = 0, yPos = 0, headingVel = 0;
@@ -26,7 +26,7 @@ void setup(void)
   while (!Serial && (millis() - serialTimeout < 5000)) {
     yield();
   }
-  
+
   if (!bno.begin())
   {
     Serial.print("No BNO055 detected");

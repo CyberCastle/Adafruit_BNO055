@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
+
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
@@ -77,12 +77,12 @@ void setup(void)
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-   
+
   last_sample = millis();
 
   /* Use external crystal for better accuracy */
   bno.setExtCrystalUse(true);
-   
+
   /* Display some basic information on this sensor */
   displaySensorDetails();
 }
