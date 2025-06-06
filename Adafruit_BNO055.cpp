@@ -28,7 +28,6 @@
  */
 
 #include "Arduino.h"
-
 #include <limits.h>
 #include <math.h>
 
@@ -493,117 +492,6 @@ imu::Quaternion Adafruit_BNO055::getQuat() {
   const double scale = (1.0 / (1 << 14));
   imu::Quaternion quat(scale * w, scale * x, scale * y, scale * z);
   return quat;
-}
-
-/*!
- *  @brief  Provides the sensor_t data for this sensor
- *  @param  sensor
- *          Sensor description
- */
-void Adafruit_BNO055::getSensor(sensor_t *sensor) {
-  /* Clear the sensor_t object */
-  memset(sensor, 0, sizeof(sensor_t));
-
-  /* Insert the sensor name in the fixed length char array */
-  strncpy(sensor->name, "BNO055", sizeof(sensor->name) - 1);
-  sensor->name[sizeof(sensor->name) - 1] = 0;
-  sensor->version = 1;
-  sensor->sensor_id = _sensorID;
-  sensor->type = SENSOR_TYPE_ORIENTATION;
-  sensor->min_delay = 0;
-  sensor->max_value = 0.0F;
-  sensor->min_value = 0.0F;
-  sensor->resolution = 0.01F;
-}
-
-/*!
- *  @brief  Reads the sensor and returns the data as a sensors_event_t
- *  @param  event
- *          Event description
- *  @return always returns true
- */
-bool Adafruit_BNO055::getEvent(sensors_event_t *event) {
-  /* Clear the event */
-  memset(event, 0, sizeof(sensors_event_t));
-
-  event->version = sizeof(sensors_event_t);
-  event->sensor_id = _sensorID;
-  event->type = SENSOR_TYPE_ORIENTATION;
-  event->timestamp = millis();
-
-  /* Get a Euler angle sample for orientation */
-  imu::Vector<3> euler = getVector(Adafruit_BNO055::VECTOR_EULER);
-  event->orientation.x = euler.x();
-  event->orientation.y = euler.y();
-  event->orientation.z = euler.z();
-
-  return true;
-}
-
-/*!
- *  @brief  Reads the sensor and returns the data as a sensors_event_t
- *  @param  event
- *          Event description
- *  @param  vec_type
- *          specify the type of reading
- *  @return always returns true
- */
-bool Adafruit_BNO055::getEvent(sensors_event_t *event,
-                               adafruit_vector_type_t vec_type) {
-  /* Clear the event */
-  memset(event, 0, sizeof(sensors_event_t));
-
-  event->version = sizeof(sensors_event_t);
-  event->sensor_id = _sensorID;
-  event->timestamp = millis();
-
-  // read the data according to vec_type
-  imu::Vector<3> vec;
-  if (vec_type == Adafruit_BNO055::VECTOR_LINEARACCEL) {
-    event->type = SENSOR_TYPE_LINEAR_ACCELERATION;
-    vec = getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
-
-    event->acceleration.x = vec.x();
-    event->acceleration.y = vec.y();
-    event->acceleration.z = vec.z();
-  } else if (vec_type == Adafruit_BNO055::VECTOR_ACCELEROMETER) {
-    event->type = SENSOR_TYPE_ACCELEROMETER;
-    vec = getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-
-    event->acceleration.x = vec.x();
-    event->acceleration.y = vec.y();
-    event->acceleration.z = vec.z();
-  } else if (vec_type == Adafruit_BNO055::VECTOR_GRAVITY) {
-    event->type = SENSOR_TYPE_GRAVITY;
-    vec = getVector(Adafruit_BNO055::VECTOR_GRAVITY);
-
-    event->acceleration.x = vec.x();
-    event->acceleration.y = vec.y();
-    event->acceleration.z = vec.z();
-  } else if (vec_type == Adafruit_BNO055::VECTOR_EULER) {
-    event->type = SENSOR_TYPE_ORIENTATION;
-    vec = getVector(Adafruit_BNO055::VECTOR_EULER);
-
-    event->orientation.x = vec.x();
-    event->orientation.y = vec.y();
-    event->orientation.z = vec.z();
-  } else if (vec_type == Adafruit_BNO055::VECTOR_GYROSCOPE) {
-    event->type = SENSOR_TYPE_GYROSCOPE;
-    vec = getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-
-    event->gyro.x = vec.x() * SENSORS_DPS_TO_RADS;
-    event->gyro.y = vec.y() * SENSORS_DPS_TO_RADS;
-    event->gyro.z = vec.z() * SENSORS_DPS_TO_RADS;
-  } else if (vec_type == Adafruit_BNO055::VECTOR_MAGNETOMETER) {
-    event->type = SENSOR_TYPE_MAGNETIC_FIELD;
-    vec = getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-
-    event->magnetic.x = vec.x();
-    event->magnetic.y = vec.y();
-    event->magnetic.z = vec.z();
-  }
-
-  return true;
 }
 
 /*!

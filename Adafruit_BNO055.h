@@ -23,7 +23,6 @@
 #define __ADAFRUIT_BNO055_H__
 
 #include "Arduino.h"
-
 #include "utility/imumaths.h"
 #include <Adafruit_I2CDevice.h>
 
@@ -78,7 +77,7 @@ typedef enum {
  *  @brief  Class that stores state and functions for interacting with
  *          BNO055 Sensor
  */
-class Adafruit_BNO055 : public Adafruit_Sensor {
+class Adafruit_BNO055 {
 public:
   /** BNO055 Registers **/
   typedef enum {
@@ -297,11 +296,6 @@ public:
   imu::Vector<3> getVector(adafruit_vector_type_t vector_type);
   imu::Quaternion getQuat();
   int8_t getTemp();
-
-  /* Adafruit_Sensor implementation */
-  bool getEvent(sensors_event_t *);
-  bool getEvent(sensors_event_t *, adafruit_vector_type_t);
-  void getSensor(sensor_t *);
 
   /* Functions to deal with raw calibration data */
   bool getSensorOffsets(uint8_t *calibData);
