@@ -30,3 +30,9 @@ MIT license, check license.txt for more information
 All text above must be included in any redistribution
 
 To install, use the Arduino Library Manager and search for "Adafruit BNO055" and install the library.
+
+### Recent Changes
+
+- Added a `nonBlockingDelay(ms)` method to the `Adafruit_BNO055` class.
+- All examples now use this method instead of `delay()` to avoid blocking the
+  microcontroller while waiting between samples.
