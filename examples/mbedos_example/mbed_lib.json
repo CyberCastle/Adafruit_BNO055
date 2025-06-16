@@ -1,0 +1,23 @@
+{
+    "name": "bno055-mbedos-example",
+    "version": "1.0.0",
+    "description": "Ejemplo de uso de BNO055 con MbedOS",
+    "keywords": ["sensor", "imu", "bno055", "mbedos", "adafruit"],
+    "author": "Adafruit Industries",
+    "license": "MIT",
+    "dependencies": {
+        "mbed-os": "~6.0.0"
+    },
+    "target_dependencies": {},
+    "config": {
+        "i2c-frequency": {
+            "help": "Frecuencia del bus I2C en Hz",
+            "value": 400000
+        },
+        "sensor-sample-rate": {
+            "help": "Tasa de muestreo del sensor en ms",
+            "value": 100
+        }
+    },
+    "macros": ["MBED_CONF_RTOS_PRESENT=1"]
+}
