@@ -18,6 +18,9 @@ double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outpu
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 unsigned long last_sample_us = 0;
 
+/**
+ * @brief Arduino setup function
+ */
 void setup(void)
 {
   Serial.begin(115200);
@@ -37,6 +40,9 @@ void setup(void)
   last_sample_us = micros();
 }
 
+/**
+ * @brief Main program loop
+ */
 void loop(void)
 {
   if (micros() - last_sample_us < (BNO055_SAMPLERATE_DELAY_MS * 1000)) {
@@ -75,9 +81,12 @@ void loop(void)
 
 
 
-  // fin de la muestra, vuelve inmediatamente
+  // end of the sample, return immediately
 }
 
+/**
+ * @brief Helper to print a sensors_event_t structure
+ */
 void printEvent(sensors_event_t* event) {
   Serial.println();
   Serial.print(event->type);

@@ -29,18 +29,15 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-unsigned long last_sample = 0;  // tiempo del último muestreo
+unsigned long last_sample = 0;  ///< time of the last sample
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-/**************************************************************************/
-/*
-    Displays some basic information on this sensor from the unified
-    sensor API sensor_t type (see Adafruit_Sensor for more information)
-*/
-/**************************************************************************/
+/**
+ * @brief Displays information about this sensor using the unified sensor API
+ */
 void displaySensorDetails(void)
 {
   sensor_t sensor;
@@ -60,11 +57,9 @@ void displaySensorDetails(void)
   }
 }
 
-/**************************************************************************/
-/*
-    Arduino setup function (automatically called at startup)
-*/
-/**************************************************************************/
+/**
+ * @brief Arduino setup function called on startup
+ */
 void setup(void)
 {
   Serial.begin(115200);
@@ -87,12 +82,9 @@ void setup(void)
   displaySensorDetails();
 }
 
-/**************************************************************************/
-/*
-    Arduino loop function, called once 'setup' is complete (your own code
-    should go here)
-*/
-/**************************************************************************/
+/**
+ * @brief Main program loop executed after setup()
+ */
 void loop(void)
 {
   if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {

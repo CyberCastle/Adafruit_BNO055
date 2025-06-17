@@ -19,17 +19,15 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-unsigned long last_sample = 0;  // tiempo del último muestreo
+unsigned long last_sample = 0;  ///< time of the last sample
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28, &Wire);
 
-/**************************************************************************/
-/*
-    Arduino setup function (automatically called at startup)
-*/
-/**************************************************************************/
+/**
+ * @brief Arduino setup function called at startup
+ */
 void setup(void)
 {
   Serial.begin(115200);
@@ -63,16 +61,13 @@ void setup(void)
   Serial.println("Calibration status values: 0=uncalibrated, 3=fully calibrated");
 }
 
-/**************************************************************************/
-/*
-    Arduino loop function, called once 'setup' is complete (your own code
-    should go here)
-*/
-/**************************************************************************/
+/**
+ * @brief Main program loop executed after setup()
+ */
 void loop(void)
 {
   if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
-    return; // espera sin bloquear
+    return; // non-blocking wait
   }
   last_sample = millis();
   // Possible vector values can be:

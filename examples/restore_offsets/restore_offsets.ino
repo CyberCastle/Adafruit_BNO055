@@ -37,12 +37,9 @@
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-/**************************************************************************/
-/*
-    Displays some basic information on this sensor from the unified
-    sensor API sensor_t type (see Adafruit_Sensor for more information)
-    */
-/**************************************************************************/
+/**
+ * @brief Display basic information about the sensor using the unified API
+ */
 void displaySensorDetails(void)
 {
     sensor_t sensor;
@@ -60,10 +57,9 @@ void displaySensorDetails(void)
 }
 
 /**************************************************************************/
-/*
-    Display some basic info about the sensor status
-    */
-/**************************************************************************/
+/**
+ * @brief Display basic information about sensor status
+ */
 void displaySensorStatus(void)
 {
     /* Get the system status values (mostly for debugging purposes) */
@@ -83,11 +79,9 @@ void displaySensorStatus(void)
     delay(500);
 }
 
-/**************************************************************************/
-/*
-    Display sensor calibration status
-    */
-/**************************************************************************/
+/**
+ * @brief Display sensor calibration status
+ */
 void displayCalStatus(void)
 {
     /* Get the four calibration values (0..3) */
@@ -115,11 +109,9 @@ void displayCalStatus(void)
     Serial.print(mag, DEC);
 }
 
-/**************************************************************************/
-/*
-    Display the raw calibration offset and radius data
-    */
-/**************************************************************************/
+/**
+ * @brief Display the raw calibration offset and radius data
+ */
 void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData)
 {
     Serial.print("Accelerometer: ");
@@ -145,11 +137,9 @@ void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData)
 }
 
 
-/**************************************************************************/
-/*
-    Arduino setup function (automatically called at startup)
-    */
-/**************************************************************************/
+/**
+ * @brief Arduino setup function executed on startup
+ */
 void setup(void)
 {
     Serial.begin(115200);
@@ -268,6 +258,9 @@ void setup(void)
     delay(500);
 }
 
+/**
+ * @brief Main program loop
+ */
 void loop() {
     /* Get a new sensor event */
     sensors_event_t event;
