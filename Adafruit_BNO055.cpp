@@ -38,12 +38,13 @@
 using namespace std::chrono;
 #endif
 
+/*! \brief Non-blocking millisecond delay helper */
 void Adafruit_BNO055::nonBlockingDelay(uint32_t ms) {
 #ifdef MBED_H
-    // Para MbedOS, usar ThisThread::sleep_for para pausas no bloqueantes
+    // Use MbedOS thread sleep for non-blocking pauses
     ThisThread::sleep_for(chrono::milliseconds(ms));
 #else
-    // Fallback para Arduino u otros sistemas
+    // Fallback for Arduino or other systems
     uint32_t start = millis();
     while (millis() - start < ms) {
         yield();
@@ -779,10 +780,10 @@ bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte *buffer,
  */
 void Adafruit_BNO055::nonBlockingMicroDelay(uint32_t us) {
 #ifdef MBED_H
-    // Para MbedOS, usar wait_us para pausas cortas precisas
+    // Use MbedOS wait_us for precise short delays
     wait_us(us);
 #else
-    // Fallback para Arduino u otros sistemas
+    // Fallback for Arduino or other systems
     delayMicroseconds(us);
 #endif
 }
@@ -792,15 +793,15 @@ void Adafruit_BNO055::nonBlockingMicroDelay(uint32_t us) {
  */
 void Adafruit_BNO055::yieldThread() {
 #ifdef MBED_H
-    // Para MbedOS, usar ThisThread::yield para ceder control del hilo
+    // Use MbedOS specific thread yield
     ThisThread::yield();
 #else
-    // Fallback para Arduino u otros sistemas
+    // Fallback for Arduino or other systems
     yield();
 #endif
 }
 
-// Read all raw accel, mag, gyro data in one burst
+/*!\brief Read all raw accelerometer, magnetometer and gyroscope data */
 bool Adafruit_BNO055::getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
                                        int16_t &mx, int16_t &my, int16_t &mz,
                                        int16_t &gx, int16_t &gy, int16_t &gz) {

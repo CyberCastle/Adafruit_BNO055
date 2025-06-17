@@ -29,20 +29,23 @@
 
 /* Set the delay between fresh samples */
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
-unsigned long last_sample = 0; // tiempo del último muestreo
+unsigned long last_sample = 0; // time of the last sample
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
 
+/**
+ * @brief Arduino setup function
+ */
 void setup(void) {
     Serial.begin(115200);
 
     unsigned long serialTimeout = millis();
     while (!Serial && (millis() - serialTimeout < 5000)) {
-        // NOTA MBEDOS: En aplicaciones MbedOS, la librería usa automáticamente
-        // ThisThread::yield() en lugar de yield() para mejor gestión de hilos
-        yield(); // espera sin bloquear el resto del sistema
+        // NOTE: on MbedOS the library automatically uses ThisThread::yield()
+        // instead of yield() for better thread management
+        yield(); // non-blocking wait
     }
 
     Serial.println("Orientation Sensor Test");
@@ -59,9 +62,12 @@ void setup(void) {
     last_sample = millis();
 }
 
+/**
+ * @brief Main program loop
+ */
 void loop(void) {
     if (millis() - last_sample < BNO055_SAMPLERATE_DELAY_MS) {
-        return; // espera sin bloquear hasta el siguiente muestreo
+        return; // non-blocking wait until next sample
     }
     last_sample = millis();
     // could add VECTOR_ACCELEROMETER, VECTOR_MAGNETOMETER,VECTOR_GRAVITY...

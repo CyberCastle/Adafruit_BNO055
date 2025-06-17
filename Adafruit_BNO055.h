@@ -296,19 +296,56 @@ class Adafruit_BNO055 {
     void getCalibration(uint8_t *system, uint8_t *gyro, uint8_t *accel,
                         uint8_t *mag);
 
+    /**
+     * @brief Retrieve a vector of the requested type from the sensor
+     * @param vector_type The vector data to request
+     * @return 3D vector containing the requested data
+     */
     imu::Vector<3> getVector(adafruit_vector_type_t vector_type);
+    /**
+     * @brief Get the quaternion orientation from the sensor
+     * @return Quaternion describing the current orientation
+     */
     imu::Quaternion getQuat();
+    /**
+     * @brief Read the temperature in degrees Celsius
+     * @return Temperature value in degrees Celsius
+     */
     int8_t getTemp();
 
     /* Functions to deal with raw calibration data */
+    /**
+     * @brief Read calibration offsets into a byte buffer
+     * @param calibData Pointer to an array of 22 bytes
+     * @return True if offsets were read successfully
+     */
     bool getSensorOffsets(uint8_t *calibData);
+    /**
+     * @brief Read calibration offsets into a struct
+     * @param offsets_type Reference to struct to fill
+     * @return True if offsets were read successfully
+     */
     bool getSensorOffsets(adafruit_bno055_offsets_t &offsets_type);
+    /**
+     * @brief Write calibration offsets from a byte buffer
+     * @param calibData Pointer to an array of 22 bytes
+     */
     void setSensorOffsets(const uint8_t *calibData);
+    /**
+     * @brief Write calibration offsets from a struct
+     * @param offsets_type Struct containing the offsets
+     */
     void setSensorOffsets(const adafruit_bno055_offsets_t &offsets_type);
+    /**
+     * @brief Check if all required sensors are fully calibrated
+     * @return True if calibration status is complete
+     */
     bool isFullyCalibrated();
 
     /* Power managments functions */
+    /** Enter Suspend mode (low power sleep) */
     void enterSuspendMode();
+    /** Exit Suspend mode and return to normal operation */
     void enterNormalMode();
     /**
      * @brief Read all raw sensor data (accel, mag, gyro) in one burst
@@ -328,12 +365,39 @@ class Adafruit_BNO055 {
                           int16_t &gx, int16_t &gy, int16_t &gz);
 
   private:
+    /**
+     * @brief Non-blocking millisecond delay helper
+     * @param ms Number of milliseconds to wait
+     */
     void nonBlockingDelay(uint32_t ms);
+    /**
+     * @brief Non-blocking microsecond delay helper
+     * @param us Number of microseconds to wait
+     */
     void nonBlockingMicroDelay(uint32_t us);
+    /** Yield to other threads or the scheduler */
     void yieldThread();
-    byte read8(adafruit_bno055_reg_t);
-    bool readLen(adafruit_bno055_reg_t, byte *buffer, uint8_t len);
-    bool write8(adafruit_bno055_reg_t, byte value);
+    /**
+     * @brief Read a single byte from the specified register
+     * @param reg Register address
+     * @return Value read from device
+     */
+    byte read8(adafruit_bno055_reg_t reg);
+    /**
+     * @brief Read multiple bytes from the sensor
+     * @param reg Starting register
+     * @param buffer Buffer to store read data
+     * @param len Number of bytes to read
+     * @return True if the read was successful
+     */
+    bool readLen(adafruit_bno055_reg_t reg, byte *buffer, uint8_t len);
+    /**
+     * @brief Write a byte value to the specified register
+     * @param reg Register address
+     * @param value Byte to write
+     * @return True if the write was successful
+     */
+    bool write8(adafruit_bno055_reg_t reg, byte value);
 
     Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
 
