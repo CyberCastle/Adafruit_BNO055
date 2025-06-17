@@ -359,7 +359,7 @@ void Adafruit_BNO055::getRevInfo(adafruit_bno055_rev_info_t *info) {
 
     a = read8(BNO055_SW_REV_ID_LSB_ADDR);
     b = read8(BNO055_SW_REV_ID_MSB_ADDR);
-    info->sw_rev = (((uint16_t)b) << 8) | ((uint16_t)a);
+    info->sw_rev = (uint16_t)(a | (b << 8));
 }
 
 /*!
@@ -426,9 +426,9 @@ imu::Vector<3> Adafruit_BNO055::getVector(adafruit_vector_type_t vector_type) {
     /* Read vector data (6 bytes) */
     readLen((adafruit_bno055_reg_t)vector_type, buffer, 6);
 
-    x = ((int16_t)buffer[0]) | (((int16_t)buffer[1]) << 8);
-    y = ((int16_t)buffer[2]) | (((int16_t)buffer[3]) << 8);
-    z = ((int16_t)buffer[4]) | (((int16_t)buffer[5]) << 8);
+    x = (int16_t)(buffer[0] | (buffer[1] << 8));
+    y = (int16_t)(buffer[2] | (buffer[3] << 8));
+    z = (int16_t)(buffer[4] | (buffer[5] << 8));
 
     /*!
      * Convert the value to an appropriate range (section 3.6.4)
@@ -489,10 +489,10 @@ imu::Quaternion Adafruit_BNO055::getQuat() {
 
     /* Read quat data (8 bytes) */
     readLen(BNO055_QUATERNION_DATA_W_LSB_ADDR, buffer, 8);
-    w = (((uint16_t)buffer[1]) << 8) | ((uint16_t)buffer[0]);
-    x = (((uint16_t)buffer[3]) << 8) | ((uint16_t)buffer[2]);
-    y = (((uint16_t)buffer[5]) << 8) | ((uint16_t)buffer[4]);
-    z = (((uint16_t)buffer[7]) << 8) | ((uint16_t)buffer[6]);
+    w = (uint16_t)(buffer[0] | (buffer[1] << 8));
+    x = (uint16_t)(buffer[2] | (buffer[3] << 8));
+    y = (uint16_t)(buffer[4] | (buffer[5] << 8));
+    z = (uint16_t)(buffer[6] | (buffer[7] << 8));
 
     /*!
      * Assign to Quaternion
@@ -750,7 +750,7 @@ void Adafruit_BNO055::enterNormalMode() {
  *  @brief  Writes an 8 bit value over I2C
  */
 bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value) {
-    uint8_t buffer[2] = {(uint8_t)reg, (uint8_t)value};
+    uint8_t buffer[2] = {reg, value};
     return i2c_dev->write(buffer, 2);
 }
 
@@ -760,7 +760,7 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value) {
 byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg) {
     uint8_t buffer[1] = {reg};
     i2c_dev->write_then_read(buffer, 1, buffer, 1);
-    return (byte)buffer[0];
+    return buffer[0];
 }
 
 /*!
@@ -768,7 +768,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg) {
  */
 bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte *buffer,
                               uint8_t len) {
-    uint8_t reg_buf[1] = {(uint8_t)reg};
+    uint8_t reg_buf[1] = {reg};
     return i2c_dev->write_then_read(reg_buf, 1, buffer, len);
 }
 
