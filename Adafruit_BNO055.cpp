@@ -825,3 +825,27 @@ bool Adafruit_BNO055::getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
 
     return true;
 }
+
+/*!
+ *  @brief  Reads extended sensor data: linear accel, gravity, and temperature
+ */
+bool Adafruit_BNO055::getSensorExtendedData(int16_t &lin_x, int16_t &lin_y, int16_t &lin_z,
+                                           int16_t &grav_x, int16_t &grav_y, int16_t &grav_z,
+                                           int8_t &temp) {
+    // Read 13 bytes: linear accel (6), gravity (6), temp (1)
+    uint8_t buffer[13];
+    if (!readLen(BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, buffer, 13)) {
+        return false;
+    }
+    // Parse linear acceleration
+    lin_x  = (int16_t)(buffer[0] | (buffer[1] << 8));
+    lin_y  = (int16_t)(buffer[2] | (buffer[3] << 8));
+    lin_z  = (int16_t)(buffer[4] | (buffer[5] << 8));
+    // Parse gravity vector
+    grav_x = (int16_t)(buffer[6] | (buffer[7] << 8));
+    grav_y = (int16_t)(buffer[8] | (buffer[9] << 8));
+    grav_z = (int16_t)(buffer[10] | (buffer[11] << 8));
+    // Parse temperature
+    temp   = (int8_t)buffer[12];
+    return true;
+}

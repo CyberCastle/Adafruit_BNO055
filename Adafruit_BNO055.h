@@ -363,6 +363,20 @@ class Adafruit_BNO055 {
     bool getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
                           int16_t &mx, int16_t &my, int16_t &mz,
                           int16_t &gx, int16_t &gy, int16_t &gz);
+    /**
+     * @brief Read linear acceleration, gravity vector, and temperature in one burst
+     * @param lin_x Reference to store linear acceleration X (no gravity)
+     * @param lin_y Reference to store linear acceleration Y
+     * @param lin_z Reference to store linear acceleration Z
+     * @param grav_x Reference to store gravity vector X
+     * @param grav_y Reference to store gravity vector Y
+     * @param grav_z Reference to store gravity vector Z
+     * @param temp Reference to store temperature (°C)
+     * @return true on successful read, false otherwise
+     */
+    bool getSensorExtendedData(int16_t &lin_x, int16_t &lin_y, int16_t &lin_z,
+                               int16_t &grav_x, int16_t &grav_y, int16_t &grav_z,
+                               int8_t &temp);
 
   private:
     /**
