@@ -281,7 +281,7 @@ class Adafruit_BNO055 {
         VECTOR_GRAVITY = BNO055_GRAVITY_DATA_X_LSB_ADDR
     } adafruit_vector_type_t;
 
-    Adafruit_BNO055(int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_A,
+    Adafruit_BNO055(uint8_t address = BNO055_ADDRESS_A,
                     TwoWire *theWire = &Wire);
 
     bool begin(adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF);
@@ -415,7 +415,6 @@ class Adafruit_BNO055 {
 
     Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
 
-    int32_t _sensorID;
     adafruit_bno055_opmode_t _mode;
 };
 
