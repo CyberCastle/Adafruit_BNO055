@@ -349,34 +349,34 @@ class Adafruit_BNO055 {
     void enterNormalMode();
     /**
      * @brief Read all raw sensor data (accel, mag, gyro) in one burst
-     * @param ax Reference to store raw accelerometer X
-     * @param ay Reference to store raw accelerometer Y
-     * @param az Reference to store raw accelerometer Z
-     * @param mx Reference to store raw magnetometer X
-     * @param my Reference to store raw magnetometer Y
-     * @param mz Reference to store raw magnetometer Z
-     * @param gx Reference to store raw gyroscope X
-     * @param gy Reference to store raw gyroscope Y
-     * @param gz Reference to store raw gyroscope Z
+     * @param ax Reference to store accelerometer X (m/s²)
+     * @param ay Reference to store accelerometer Y (m/s²)
+     * @param az Reference to store accelerometer Z (m/s²)
+     * @param mx Reference to store magnetometer X (µT)
+     * @param my Reference to store magnetometer Y (µT)
+     * @param mz Reference to store magnetometer Z (µT)
+     * @param gx Reference to store gyroscope X (°/s)
+     * @param gy Reference to store gyroscope Y (°/s)
+     * @param gz Reference to store gyroscope Z (°/s)
      * @return true on successful read, false otherwise
      */
-    bool getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
-                          int16_t &mx, int16_t &my, int16_t &mz,
-                          int16_t &gx, int16_t &gy, int16_t &gz);
+    bool getSensorRawData(float &ax, float &ay, float &az,
+                          float &mx, float &my, float &mz,
+                          float &gx, float &gy, float &gz);
     /**
      * @brief Read linear acceleration, gravity vector, and temperature in one burst
-     * @param lin_x Reference to store linear acceleration X (no gravity)
-     * @param lin_y Reference to store linear acceleration Y
-     * @param lin_z Reference to store linear acceleration Z
-     * @param grav_x Reference to store gravity vector X
-     * @param grav_y Reference to store gravity vector Y
-     * @param grav_z Reference to store gravity vector Z
+     * @param lin_x Reference to store linear acceleration X (m/s²)
+     * @param lin_y Reference to store linear acceleration Y (m/s²)
+     * @param lin_z Reference to store linear acceleration Z (m/s²)
+     * @param grav_x Reference to store gravity vector X (m/s²)
+     * @param grav_y Reference to store gravity vector Y (m/s²)
+     * @param grav_z Reference to store gravity vector Z (m/s²)
      * @param temp Reference to store temperature (°C)
      * @return true on successful read, false otherwise
      */
-    bool getSensorExtendedData(int16_t &lin_x, int16_t &lin_y, int16_t &lin_z,
-                               int16_t &grav_x, int16_t &grav_y, int16_t &grav_z,
-                               int8_t &temp);
+    bool getSensorExtendedData(float &lin_x, float &lin_y, float &lin_z,
+                               float &grav_x, float &grav_y, float &grav_z,
+                               float &temp);
 
   private:
     /**
