@@ -310,6 +310,22 @@ class Adafruit_BNO055 {
     /* Power managments functions */
     void enterSuspendMode();
     void enterNormalMode();
+    /**
+     * @brief Read all raw sensor data (accel, mag, gyro) in one burst
+     * @param ax Reference to store raw accelerometer X
+     * @param ay Reference to store raw accelerometer Y
+     * @param az Reference to store raw accelerometer Z
+     * @param mx Reference to store raw magnetometer X
+     * @param my Reference to store raw magnetometer Y
+     * @param mz Reference to store raw magnetometer Z
+     * @param gx Reference to store raw gyroscope X
+     * @param gy Reference to store raw gyroscope Y
+     * @param gz Reference to store raw gyroscope Z
+     * @return true on successful read, false otherwise
+     */
+    bool getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
+                          int16_t &mx, int16_t &my, int16_t &mz,
+                          int16_t &gx, int16_t &gy, int16_t &gz);
 
   private:
     void nonBlockingDelay(uint32_t ms);

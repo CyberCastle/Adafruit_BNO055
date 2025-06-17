@@ -799,3 +799,28 @@ void Adafruit_BNO055::yieldThread() {
     yield();
 #endif
 }
+
+// Read all raw accel, mag, gyro data in one burst
+bool Adafruit_BNO055::getSensorRawData(int16_t &ax, int16_t &ay, int16_t &az,
+                                       int16_t &mx, int16_t &my, int16_t &mz,
+                                       int16_t &gx, int16_t &gy, int16_t &gz) {
+    // Read 18 bytes starting from ACCEL_DATA_X_LSB
+    uint8_t buffer[18];
+    if (!readLen(ACCEL_OFFSET_X_LSB_ADDR - 0x55 + BNO055_ACCEL_DATA_X_LSB_ADDR, buffer, 18)) {
+        return false;
+    }
+    // Parse accelerometer (6 bytes)
+    ax = (int16_t)((buffer[0]) | (buffer[1] << 8));
+    ay = (int16_t)((buffer[2]) | (buffer[3] << 8));
+    az = (int16_t)((buffer[4]) | (buffer[5] << 8));
+    // Parse magnetometer (6 bytes)
+    mx = (int16_t)((buffer[6]) | (buffer[7] << 8));
+    my = (int16_t)((buffer[8]) | (buffer[9] << 8));
+    mz = (int16_t)((buffer[10]) | (buffer[11] << 8));
+    // Parse gyroscope (6 bytes)
+    gx = (int16_t)((buffer[12]) | (buffer[13] << 8));
+    gy = (int16_t)((buffer[14]) | (buffer[15] << 8));
+    gz = (int16_t)((buffer[16]) | (buffer[17] << 8));
+
+    return true;
+}
