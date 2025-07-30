@@ -802,28 +802,28 @@ void Adafruit_BNO055::yieldThread() {
 }
 
 /*!\brief Read all raw accelerometer, magnetometer and gyroscope data with unit conversion */
-bool Adafruit_BNO055::getSensorRawData(float &ax, float &ay, float &az,
-                                       float &mx, float &my, float &mz,
-                                       float &gx, float &gy, float &gz) {
+bool Adafruit_BNO055::getSensorRawData(double &ax, double &ay, double &az,
+                                       double &mx, double &my, double &mz,
+                                       double &gx, double &gy, double &gz) {
     // Read 18 bytes starting from ACCEL_DATA_X_LSB
     uint8_t buffer[18];
     if (!readLen(BNO055_ACCEL_DATA_X_LSB_ADDR, buffer, 18)) {
         return false;
     }
     // Parse accelerometer (6 bytes) - 1 LSB = 1 m/s²
-    ax = (int16_t)((buffer[0]) | (buffer[1] << 8)) / 100.0f; // Convert to m/s²
-    ay = (int16_t)((buffer[2]) | (buffer[3] << 8)) / 100.0f;
-    az = (int16_t)((buffer[4]) | (buffer[5] << 8)) / 100.0f;
+    ax = (int16_t)((buffer[0]) | (buffer[1] << 8)) / 100.0; // Convert to m/s²
+    ay = (int16_t)((buffer[2]) | (buffer[3] << 8)) / 100.0;
+    az = (int16_t)((buffer[4]) | (buffer[5] << 8)) / 100.0;
 
     // Parse magnetometer (6 bytes) - 1 LSB = 16 µT
-    mx = (int16_t)((buffer[6]) | (buffer[7] << 8)) / 16.0f; // Convert to µT
-    my = (int16_t)((buffer[8]) | (buffer[9] << 8)) / 16.0f;
-    mz = (int16_t)((buffer[10]) | (buffer[11] << 8)) / 16.0f;
+    mx = (int16_t)((buffer[6]) | (buffer[7] << 8)) / 16.0; // Convert to µT
+    my = (int16_t)((buffer[8]) | (buffer[9] << 8)) / 16.0;
+    mz = (int16_t)((buffer[10]) | (buffer[11] << 8)) / 16.0;
 
     // Parse gyroscope (6 bytes) - 1 LSB = 1 dps
-    gx = (int16_t)((buffer[12]) | (buffer[13] << 8)) / 16.0f; // Convert to °/s
-    gy = (int16_t)((buffer[14]) | (buffer[15] << 8)) / 16.0f;
-    gz = (int16_t)((buffer[16]) | (buffer[17] << 8)) / 16.0f;
+    gx = (int16_t)((buffer[12]) | (buffer[13] << 8)) / 16.0; // Convert to °/s
+    gy = (int16_t)((buffer[14]) | (buffer[15] << 8)) / 16.0;
+    gz = (int16_t)((buffer[16]) | (buffer[17] << 8)) / 16.0;
 
     return true;
 }
@@ -831,24 +831,24 @@ bool Adafruit_BNO055::getSensorRawData(float &ax, float &ay, float &az,
 /*!
  *  @brief  Reads extended sensor data: linear accel, gravity, and temperature with unit conversion
  */
-bool Adafruit_BNO055::getSensorExtendedData(float &lin_x, float &lin_y, float &lin_z,
-                                            float &grav_x, float &grav_y, float &grav_z,
-                                            float &temp) {
+bool Adafruit_BNO055::getSensorExtendedData(double &lin_x, double &lin_y, double &lin_z,
+                                            double &grav_x, double &grav_y, double &grav_z,
+                                            double &temp) {
     // Read 13 bytes: linear accel (6), gravity (6), temp (1)
     uint8_t buffer[13];
     if (!readLen(BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, buffer, 13)) {
         return false;
-    }                                                         // Parse linear acceleration - 1 LSB = 1 m/s²
-    lin_x = (int16_t)(buffer[0] | (buffer[1] << 8)) / 100.0f; // Convert to m/s²
-    lin_y = (int16_t)(buffer[2] | (buffer[3] << 8)) / 100.0f;
-    lin_z = (int16_t)(buffer[4] | (buffer[5] << 8)) / 100.0f;
+    } // Parse linear acceleration - 1 LSB = 1 m/s²
+    lin_x = (int16_t)(buffer[0] | (buffer[1] << 8)) / 100.0; // Convert to m/s²
+    lin_y = (int16_t)(buffer[2] | (buffer[3] << 8)) / 100.0;
+    lin_z = (int16_t)(buffer[4] | (buffer[5] << 8)) / 100.0;
 
     // Parse gravity vector - 1 LSB = 1 m/s²
-    grav_x = (int16_t)(buffer[6] | (buffer[7] << 8)) / 100.0f; // Convert to m/s²
-    grav_y = (int16_t)(buffer[8] | (buffer[9] << 8)) / 100.0f;
-    grav_z = (int16_t)(buffer[10] | (buffer[11] << 8)) / 100.0f;
+    grav_x = (int16_t)(buffer[6] | (buffer[7] << 8)) / 100.0; // Convert to m/s²
+    grav_y = (int16_t)(buffer[8] | (buffer[9] << 8)) / 100.0;
+    grav_z = (int16_t)(buffer[10] | (buffer[11] << 8)) / 100.0;
 
     // Parse temperature - 1 LSB = 1°C
-    temp = static_cast<float>((int8_t)buffer[12]);
+    temp = static_cast<double>((int8_t)buffer[12]);
     return true;
 }

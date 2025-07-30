@@ -5,11 +5,11 @@ import processing.opengl.*;
 import saito.objloader.*;
 import g4p_controls.*;
 
-float roll  = 0.0F;
-float pitch = 0.0F;
-float yaw   = 0.0F;
-float temp  = 0.0F;
-float alt   = 0.0F;
+double roll  = 0.0;
+double pitch = 0.0;
+double yaw   = 0.0;
+double temp  = 0.0;
+double alt   = 0.0;
 
 OBJModel model;
 
@@ -32,7 +32,7 @@ void setup()
   model = new OBJModel(this);
   model.load("bunny.obj");
   model.scale(20);
-  
+
   // Serial port setup.
   // Grab list of serial ports and choose one that was persisted earlier or default to the first port.
   int selectedPort = 0;
@@ -48,7 +48,7 @@ void setup()
     for (int i = 0; i < availablePorts.length; ++i) {
       if (availablePorts[i].equals(savedPort)) {
         selectedPort = i;
-      } 
+      }
     }
   }
   // Build serial config UI.
@@ -59,14 +59,14 @@ void setup()
   serialList.setItems(availablePorts, selectedPort);
   configPanel.addControl(serialList);
   calLabel = new GLabel(this, 300, 20, 350, 25, "Calibration: Sys=? Gyro=? Accel=? Mag=?");
-  configPanel.addControl(calLabel); 
+  configPanel.addControl(calLabel);
   printSerialCheckbox = new GCheckbox(this, 5, 50, 200, 20, "Print serial data");
   printSerialCheckbox.setSelected(printSerial);
   configPanel.addControl(printSerialCheckbox);
   // Set serial port.
   setSerialPort(serialList.getSelectedText());
 }
- 
+
 void draw()
 {
   background(0,0,0);
@@ -79,20 +79,20 @@ void draw()
   pointLight(255, 200, 200,  400, 400,  500);
   pointLight(200, 200, 255, -400, 400,  500);
   pointLight(255, 255, 255,    0,   0, -500);
-  
+
   // Move bunny from 0,0 in upper left corner to roughly center of screen.
   translate(300, 380, 0);
-  
+
   // Rotate shapes around the X/Y/Z axis (values in radians, 0..Pi*2)
   //rotateZ(radians(roll));
   //rotateX(radians(pitch)); // extrinsic rotation
   //rotateY(radians(yaw));
-  float c1 = cos(radians(roll));
-  float s1 = sin(radians(roll));
-  float c2 = cos(radians(pitch)); // intrinsic rotation
-  float s2 = sin(radians(pitch));
-  float c3 = cos(radians(yaw));
-  float s3 = sin(radians(yaw));
+  double c1 = cos(radians(roll));
+  double s1 = sin(radians(roll));
+  double c2 = cos(radians(pitch)); // intrinsic rotation
+  double s2 = sin(radians(pitch));
+  double c3 = cos(radians(yaw));
+  double s3 = sin(radians(yaw));
   applyMatrix( c2*c3, s1*s3+c1*c3*s2, c3*s1*s2-c1*s3, 0,
                -s2, c1*c2, c2*s1, 0,
                c2*s3, c1*s2*s3-c3*s1, c1*c3+s1*s2*s3, 0,
@@ -106,29 +106,29 @@ void draw()
   //print("draw");
 }
 
-void serialEvent(Serial p) 
+void serialEvent(Serial p)
 {
   String incoming = p.readString();
   if (printSerial) {
     println(incoming);
   }
-  
+
   if ((incoming.length() > 8))
   {
     String[] list = split(incoming, " ");
-    if ( (list.length > 0) && (list[0].equals("Orientation:")) ) 
+    if ( (list.length > 0) && (list[0].equals("Orientation:")) )
     {
-      roll  = float(list[3]); // Roll = Z
-      pitch = float(list[2]); // Pitch = Y 
-      yaw   = float(list[1]); // Yaw/Heading = X
+      roll  = double(list[3]); // Roll = Z
+      pitch = double(list[2]); // Pitch = Y
+      yaw   = double(list[1]); // Yaw/Heading = X
     }
-    if ( (list.length > 0) && (list[0].equals("Alt:")) ) 
+    if ( (list.length > 0) && (list[0].equals("Alt:")) )
     {
-      alt  = float(list[1]);
+      alt  = double(list[1]);
     }
-    if ( (list.length > 0) && (list[0].equals("Temp:")) ) 
+    if ( (list.length > 0) && (list[0].equals("Temp:")) )
     {
-      temp  = float(list[1]);
+      temp  = double(list[1]);
     }
     if ( (list.length > 0) && (list[0].equals("Calibration:")) )
     {
@@ -156,7 +156,7 @@ void setSerialPort(String portName) {
   }
   catch (RuntimeException ex) {
     // Swallow error if port can't be opened, keep port closed.
-    port = null; 
+    port = null;
   }
 }
 
@@ -166,16 +166,16 @@ void handlePanelEvents(GPanel panel, GEvent event) {
   // Panel events, do nothing.
 }
 
-void handleDropListEvents(GDropList list, GEvent event) { 
+void handleDropListEvents(GDropList list, GEvent event) {
   // Drop list events, check if new serial port is selected.
   if (list == serialList) {
-    setSerialPort(serialList.getSelectedText()); 
+    setSerialPort(serialList.getSelectedText());
   }
 }
 
-void handleToggleControlEvents(GToggleControl checkbox, GEvent event) { 
+void handleToggleControlEvents(GToggleControl checkbox, GEvent event) {
   // Checkbox toggle events, check if print events is toggled.
   if (checkbox == printSerialCheckbox) {
-    printSerial = printSerialCheckbox.isSelected(); 
+    printSerial = printSerialCheckbox.isSelected();
   }
 }

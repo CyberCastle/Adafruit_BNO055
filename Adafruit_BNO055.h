@@ -360,9 +360,9 @@ class Adafruit_BNO055 {
      * @param gz Reference to store gyroscope Z (°/s)
      * @return true on successful read, false otherwise
      */
-    bool getSensorRawData(float &ax, float &ay, float &az,
-                          float &mx, float &my, float &mz,
-                          float &gx, float &gy, float &gz);
+    bool getSensorRawData(double &ax, double &ay, double &az,
+                          double &mx, double &my, double &mz,
+                          double &gx, double &gy, double &gz);
     /**
      * @brief Read linear acceleration, gravity vector, and temperature in one burst
      * @param lin_x Reference to store linear acceleration X (m/s²)
@@ -374,9 +374,9 @@ class Adafruit_BNO055 {
      * @param temp Reference to store temperature (°C)
      * @return true on successful read, false otherwise
      */
-    bool getSensorExtendedData(float &lin_x, float &lin_y, float &lin_z,
-                               float &grav_x, float &grav_y, float &grav_z,
-                               float &temp);
+    bool getSensorExtendedData(double &lin_x, double &lin_y, double &lin_z,
+                               double &grav_x, double &grav_y, double &grav_z,
+                               double &temp);
 
   private:
     /**
