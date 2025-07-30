@@ -54,21 +54,17 @@ void Adafruit_BNO055::nonBlockingDelay(uint32_t ms) {
 
 /*!
  *  @brief  Instantiates a new Adafruit_BNO055 class
- *  @param  sensorID
- *          sensor ID
  *  @param  address
  *          i2c address
  *  @param  theWire
  *          Wire object
  */
-Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address,
-                                 TwoWire *theWire) {
+Adafruit_BNO055::Adafruit_BNO055(uint8_t address, TwoWire *theWire) {
 // BNO055 clock stretches for 500us or more!
 #ifdef ESP8266
     theWire->setClockStretchLimit(1000); // Allow for 1000us of clock stretching
 #endif
 
-    _sensorID = sensorID;
     i2c_dev = new Adafruit_I2CDevice(address, theWire);
 }
 
