@@ -40,6 +40,49 @@
 /** Offsets registers **/
 #define NUM_BNO055_OFFSET_REGISTERS (22)
 
+/**
+ * Timing configuration (all delays centralized here)
+ * Notes:
+ * - Values marked as heuristic keep prior behavior; tune only if needed.
+ * - Datasheet-friendly minimums are set to small safe values (e.g., mode change ~7ms => 8ms).
+ */
+// Heuristic: total time to retry i2c_dev->begin() during boot detection
+#define BNO055_BEGIN_TIMEOUT_MS 500
+// Heuristic: delay between begin() retries
+#define BNO055_BEGIN_RETRY_DELAY_MS 10
+// Heuristic: extra wait before re-reading CHIP_ID on first probe
+#define BNO055_ID_RECHECK_DELAY_MS 200
+
+// Datasheet-friendly: time to allow mode switch/enter config to settle (~7ms)
+#define BNO055_MODE_CHANGE_DELAY_MS 8
+#define BNO055_CONFIG_ENTER_DELAY_MS 8
+
+// Heuristic: short pause right after issuing reset before polling
+#define BNO055_RESET_POST_WRITE_DELAY_MS 10
+// Heuristic: polling interval while waiting for CHIP_ID after reset
+#define BNO055_RESET_POLL_INTERVAL_MS 5
+// Heuristic: small extra settle time after CHIP_ID appears
+#define BNO055_RESET_STABLE_DELAY_MS 20
+
+// Heuristic: power mode switch settle
+#define BNO055_PWR_MODE_SWITCH_DELAY_MS 5
+// Heuristic: clearing SYS_TRIGGER settle
+#define BNO055_SYS_TRIGGER_CLEAR_DELAY_MS 10
+
+// Heuristic: extra delay after setMode in most helper flows (previously 20ms)
+#define BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS 20
+// Heuristic: extra delay after setMode specifically at the end of begin() (previously 10ms)
+#define BNO055_AFTER_MODE_SET_BEGIN_DELAY_MS 10
+
+// Heuristic: register write settle used in some configs (previously 10ms)
+#define BNO055_REG_WRITE_DELAY_MS 10
+
+// Heuristic: time to allow ext crystal switch to propagate
+#define BNO055_EXT_CRYSTAL_SWITCH_DELAY_MS 10
+
+// Heuristic: cooldown after reading system status block
+#define BNO055_SYS_STATUS_COOLDOWN_MS 200
+
 /** A structure to represent offsets **/
 typedef struct {
     int16_t accel_offset_x; /**< x acceleration offset */

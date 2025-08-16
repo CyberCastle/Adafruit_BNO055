@@ -96,15 +96,15 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
     i2c_dev->setSpeed(50000);
 #endif
 
-    // can take 850 ms to boot!
-    int timeout = 850; // in ms
+    // Can take ~850 ms to boot on some boards; we'll retry but with cooperative waits
+    int timeout = BNO055_BEGIN_TIMEOUT_MS; // heuristic total retry window
     while (timeout > 0) {
         if (i2c_dev->begin()) {
             break;
         }
         // wasnt detected... we'll retry!
-        nonBlockingDelay(10);
-        timeout -= 10;
+        nonBlockingDelay(BNO055_BEGIN_RETRY_DELAY_MS);
+        timeout -= BNO055_BEGIN_RETRY_DELAY_MS;
     }
     if (timeout <= 0)
         return false;
@@ -112,7 +112,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
     /* Make sure we have the right device */
     uint8_t id = read8(BNO055_CHIP_ID_ADDR);
     if (id != BNO055_ID) {
-        nonBlockingDelay(1000); // hold on for boot
+        nonBlockingDelay(BNO055_ID_RECHECK_DELAY_MS); // heuristic
         id = read8(BNO055_CHIP_ID_ADDR);
         if (id != BNO055_ID) {
             return false; // still not? ok bail
@@ -124,16 +124,16 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
 
     /* Reset */
     write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
-    /* Delay increased to 30ms due to power issues https://tinyurl.com/y375z699 */
-    nonBlockingDelay(30);
+    /* Cooperative small delay to allow reset */
+    nonBlockingDelay(BNO055_RESET_POST_WRITE_DELAY_MS); // heuristic
     while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID) {
-        nonBlockingDelay(10);
+        nonBlockingDelay(BNO055_RESET_POLL_INTERVAL_MS); // heuristic
     }
-    nonBlockingDelay(50);
+    nonBlockingDelay(BNO055_RESET_STABLE_DELAY_MS); // heuristic
 
     /* Set to normal power mode */
     write8(BNO055_PWR_MODE_ADDR, POWER_MODE_NORMAL);
-    nonBlockingDelay(10);
+    nonBlockingDelay(BNO055_PWR_MODE_SWITCH_DELAY_MS); // heuristic
 
     write8(BNO055_PAGE_ID_ADDR, 0);
 
@@ -150,16 +150,16 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
     /* Configure axis mapping (see section 3.4) */
     /*
     write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
-    nonBlockingDelay(10);
+    nonBlockingDelay(5);
     write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
     nonBlockingDelay(10);
     */
 
     write8(BNO055_SYS_TRIGGER_ADDR, 0x0);
-    nonBlockingDelay(10);
+    nonBlockingDelay(BNO055_SYS_TRIGGER_CLEAR_DELAY_MS); // heuristic
     /* Set the requested operating mode (see section 3.3) */
     setMode(mode);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_BEGIN_DELAY_MS); // heuristic
 
     return true;
 }
@@ -185,7 +185,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
 void Adafruit_BNO055::setMode(adafruit_bno055_opmode_t mode) {
     _mode = mode;
     write8(BNO055_OPR_MODE_ADDR, _mode);
-    nonBlockingDelay(30);
+    nonBlockingDelay(BNO055_MODE_CHANGE_DELAY_MS); // datasheet-friendly minimum
 }
 
 /*!
@@ -215,12 +215,12 @@ void Adafruit_BNO055::setAxisRemap(
     adafruit_bno055_opmode_t modeback = _mode;
 
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
     write8(BNO055_AXIS_MAP_CONFIG_ADDR, remapcode);
-    nonBlockingDelay(10);
+    nonBlockingDelay(BNO055_REG_WRITE_DELAY_MS);
     /* Set the requested operating mode (see section 3.3) */
     setMode(modeback);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS);
 }
 
 /*!
@@ -240,12 +240,12 @@ void Adafruit_BNO055::setAxisSign(adafruit_bno055_axis_remap_sign_t remapsign) {
     adafruit_bno055_opmode_t modeback = _mode;
 
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
     write8(BNO055_AXIS_MAP_SIGN_ADDR, remapsign);
-    nonBlockingDelay(10);
+    nonBlockingDelay(BNO055_REG_WRITE_DELAY_MS);
     /* Set the requested operating mode (see section 3.3) */
     setMode(modeback);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS);
 }
 
 /*!
@@ -258,17 +258,17 @@ void Adafruit_BNO055::setExtCrystalUse(boolean usextal) {
 
     /* Switch to config mode (just in case since this is the default) */
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
     write8(BNO055_PAGE_ID_ADDR, 0);
     if (usextal) {
         write8(BNO055_SYS_TRIGGER_ADDR, 0x80);
     } else {
         write8(BNO055_SYS_TRIGGER_ADDR, 0x00);
     }
-    nonBlockingDelay(10);
+    nonBlockingDelay(BNO055_EXT_CRYSTAL_SWITCH_DELAY_MS);
     /* Set the requested operating mode (see section 3.3) */
     setMode(modeback);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS);
 }
 
 /*!
@@ -329,7 +329,7 @@ void Adafruit_BNO055::getSystemStatus(uint8_t *system_status,
     if (system_error != 0)
         *system_error = read8(BNO055_SYS_ERR_ADDR);
 
-    nonBlockingDelay(200);
+    nonBlockingDelay(BNO055_SYS_STATUS_COOLDOWN_MS); // heuristic
 }
 
 /*!
@@ -532,7 +532,7 @@ bool Adafruit_BNO055::getSensorOffsets(
     if (isFullyCalibrated()) {
         adafruit_bno055_opmode_t lastMode = _mode;
         setMode(OPERATION_MODE_CONFIG);
-        nonBlockingDelay(25);
+        nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
 
         /* Accel offset range depends on the G-range:
            +/-2g  = +/- 2000 mg
@@ -590,7 +590,7 @@ bool Adafruit_BNO055::getSensorOffsets(
 void Adafruit_BNO055::setSensorOffsets(const uint8_t *calibData) {
     adafruit_bno055_opmode_t lastMode = _mode;
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
 
     /* Note: Configuration will take place only when user writes to the last
        byte of each config data pair (ex. ACCEL_OFFSET_Z_MSB_ADDR, etc.).
@@ -647,7 +647,7 @@ void Adafruit_BNO055::setSensorOffsets(
     const adafruit_bno055_offsets_t &offsets_type) {
     adafruit_bno055_opmode_t lastMode = _mode;
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
 
     /* Note: Configuration will take place only when user writes to the last
        byte of each config data pair (ex. ACCEL_OFFSET_Z_MSB_ADDR, etc.).
@@ -721,11 +721,11 @@ void Adafruit_BNO055::enterSuspendMode() {
 
     /* Switch to config mode (just in case since this is the default) */
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
     write8(BNO055_PWR_MODE_ADDR, 0x02);
     /* Set the requested operating mode (see section 3.3) */
     setMode(modeback);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS);
 }
 
 /*!
@@ -736,11 +736,11 @@ void Adafruit_BNO055::enterNormalMode() {
 
     /* Switch to config mode (just in case since this is the default) */
     setMode(OPERATION_MODE_CONFIG);
-    nonBlockingDelay(25);
+    nonBlockingDelay(BNO055_CONFIG_ENTER_DELAY_MS); // datasheet-friendly minimum
     write8(BNO055_PWR_MODE_ADDR, 0x00);
     /* Set the requested operating mode (see section 3.3) */
     setMode(modeback);
-    nonBlockingDelay(20);
+    nonBlockingDelay(BNO055_AFTER_MODE_SET_EXTRA_DELAY_MS);
 }
 
 /*!
@@ -834,7 +834,7 @@ bool Adafruit_BNO055::getSensorExtendedData(double &lin_x, double &lin_y, double
     uint8_t buffer[13];
     if (!readLen(BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, buffer, 13)) {
         return false;
-    } // Parse linear acceleration - 1 LSB = 1 m/s²
+    }                                                        // Parse linear acceleration - 1 LSB = 1 m/s²
     lin_x = (int16_t)(buffer[0] | (buffer[1] << 8)) / 100.0; // Convert to m/s²
     lin_y = (int16_t)(buffer[2] | (buffer[3] << 8)) / 100.0;
     lin_z = (int16_t)(buffer[4] | (buffer[5] << 8)) / 100.0;
