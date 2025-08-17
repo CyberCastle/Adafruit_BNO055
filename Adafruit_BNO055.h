@@ -125,6 +125,28 @@ typedef enum {
  */
 class Adafruit_BNO055 {
   public:
+    /**
+     * @brief Structure with a full burst read of common data blocks
+     *        Read with readAllBurst() for minimal I2C overhead.
+     */
+    typedef struct {
+        // Raw sensors (scaled)
+        double accel_x, accel_y, accel_z; // m/s²
+        double mag_x, mag_y, mag_z;       // µT
+        double gyro_x, gyro_y, gyro_z;    // °/s
+
+        // Fused orientation
+        double euler_h, euler_r, euler_p;      // degrees
+        double quat_w, quat_x, quat_y, quat_z; // unitless
+
+        // Linear accel and gravity
+        double lin_x, lin_y, lin_z;    // m/s²
+        double grav_x, grav_y, grav_z; // m/s²
+
+        // Temperature
+        double temperature_c; // °C
+    } bno055_data_t;
+
     /** BNO055 Registers **/
     typedef enum {
         /* Page id register definition */
@@ -345,11 +367,13 @@ class Adafruit_BNO055 {
      * @return 3D vector containing the requested data
      */
     imu::Vector<3> getVector(adafruit_vector_type_t vector_type);
+
     /**
      * @brief Get the quaternion orientation from the sensor
      * @return Quaternion describing the current orientation
      */
     imu::Quaternion getQuat();
+
     /**
      * @brief Read the temperature in degrees Celsius
      * @return Temperature value in degrees Celsius
@@ -363,22 +387,26 @@ class Adafruit_BNO055 {
      * @return True if offsets were read successfully
      */
     bool getSensorOffsets(uint8_t *calibData);
+
     /**
      * @brief Read calibration offsets into a struct
      * @param offsets_type Reference to struct to fill
      * @return True if offsets were read successfully
      */
     bool getSensorOffsets(adafruit_bno055_offsets_t &offsets_type);
+
     /**
      * @brief Write calibration offsets from a byte buffer
      * @param calibData Pointer to an array of 22 bytes
      */
     void setSensorOffsets(const uint8_t *calibData);
+
     /**
      * @brief Write calibration offsets from a struct
      * @param offsets_type Struct containing the offsets
      */
     void setSensorOffsets(const adafruit_bno055_offsets_t &offsets_type);
+
     /**
      * @brief Check if all required sensors are fully calibrated
      * @return True if calibration status is complete
@@ -406,6 +434,7 @@ class Adafruit_BNO055 {
     bool getSensorRawData(double &ax, double &ay, double &az,
                           double &mx, double &my, double &mz,
                           double &gx, double &gy, double &gz);
+
     /**
      * @brief Read linear acceleration, gravity vector, and temperature in one burst
      * @param lin_x Reference to store linear acceleration X (m/s²)
@@ -421,25 +450,29 @@ class Adafruit_BNO055 {
                                double &grav_x, double &grav_y, double &grav_z,
                                double &temp);
 
+    /**
+     * @brief Single I2C burst to retrieve accel, mag, gyro, euler, quat,
+     *        linear accel, gravity and temperature in one transaction.
+     *        Starts at 0x08 and reads 45 bytes through 0x34 inclusive.
+     * @param out Struct to fill with scaled values
+     * @return true on successful read, false otherwise
+     */
+    bool readAllBurst(bno055_data_t &out);
+
   private:
     /**
      * @brief Non-blocking millisecond delay helper
      * @param ms Number of milliseconds to wait
      */
     void nonBlockingDelay(uint32_t ms);
-    /**
-     * @brief Non-blocking microsecond delay helper
-     * @param us Number of microseconds to wait
-     */
-    void nonBlockingMicroDelay(uint32_t us);
-    /** Yield to other threads or the scheduler */
-    void yieldThread();
+
     /**
      * @brief Read a single byte from the specified register
      * @param reg Register address
      * @return Value read from device
      */
     byte read8(adafruit_bno055_reg_t reg);
+
     /**
      * @brief Read multiple bytes from the sensor
      * @param reg Starting register
@@ -448,6 +481,7 @@ class Adafruit_BNO055 {
      * @return True if the read was successful
      */
     bool readLen(adafruit_bno055_reg_t reg, byte *buffer, uint8_t len);
+
     /**
      * @brief Write a byte value to the specified register
      * @param reg Register address

@@ -124,6 +124,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
 
     /* Reset */
     write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
+
     /* Cooperative small delay to allow reset */
     nonBlockingDelay(BNO055_RESET_POST_WRITE_DELAY_MS); // heuristic
     while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID) {
@@ -157,6 +158,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
 
     write8(BNO055_SYS_TRIGGER_ADDR, 0x0);
     nonBlockingDelay(BNO055_SYS_TRIGGER_CLEAR_DELAY_MS); // heuristic
+
     /* Set the requested operating mode (see section 3.3) */
     setMode(mode);
     nonBlockingDelay(BNO055_AFTER_MODE_SET_BEGIN_DELAY_MS); // heuristic
@@ -769,34 +771,6 @@ bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte *buffer,
     return i2c_dev->write_then_read(reg_buf, 1, buffer, len);
 }
 
-/*!
- *  @brief  Non-blocking microsecond delay for hardware timing
- *  @param  us
- *          microseconds to delay
- */
-void Adafruit_BNO055::nonBlockingMicroDelay(uint32_t us) {
-#ifdef MBED_H
-    // Use MbedOS wait_us for precise short delays
-    wait_us(us);
-#else
-    // Fallback for Arduino or other systems
-    delayMicroseconds(us);
-#endif
-}
-
-/*!
- *  @brief  Yield control to other threads without delay
- */
-void Adafruit_BNO055::yieldThread() {
-#ifdef MBED_H
-    // Use MbedOS specific thread yield
-    ThisThread::yield();
-#else
-    // Fallback for Arduino or other systems
-    yield();
-#endif
-}
-
 /*!\brief Read all raw accelerometer, magnetometer and gyroscope data with unit conversion */
 bool Adafruit_BNO055::getSensorRawData(double &ax, double &ay, double &az,
                                        double &mx, double &my, double &mz,
@@ -834,7 +808,7 @@ bool Adafruit_BNO055::getSensorExtendedData(double &lin_x, double &lin_y, double
     uint8_t buffer[13];
     if (!readLen(BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, buffer, 13)) {
         return false;
-    }                                                        // Parse linear acceleration - 1 LSB = 1 m/s²
+    } // Parse linear acceleration - 1 LSB = 1 m/s²
     lin_x = (int16_t)(buffer[0] | (buffer[1] << 8)) / 100.0; // Convert to m/s²
     lin_y = (int16_t)(buffer[2] | (buffer[3] << 8)) / 100.0;
     lin_z = (int16_t)(buffer[4] | (buffer[5] << 8)) / 100.0;
@@ -846,5 +820,69 @@ bool Adafruit_BNO055::getSensorExtendedData(double &lin_x, double &lin_y, double
 
     // Parse temperature - 1 LSB = 1°C
     temp = static_cast<double>((int8_t)buffer[12]);
+    return true;
+}
+
+/*!
+ *  @brief  Read all common data blocks with one I2C transaction
+ *          Layout (contiguous starting at 0x08):
+ *            0-5   Accel XYZ (6)
+ *            6-11  Mag   XYZ (6)
+ *            12-17 Gyro  XYZ (6)
+ *            18-23 Euler HRP (6)
+ *            24-31 Quat  WXYZ (8)
+ *            32-37 Linear Accel XYZ (6)
+ *            38-43 Gravity XYZ (6)
+ *            44    Temp (1)
+ */
+bool Adafruit_BNO055::readAllBurst(bno055_data_t &out) {
+    uint8_t buffer[45];
+    if (!readLen(BNO055_ACCEL_DATA_X_LSB_ADDR, buffer, sizeof(buffer))) {
+        return false;
+    }
+
+    auto rd16 = [](const uint8_t *p) -> int16_t {
+        return (int16_t)(p[0] | (p[1] << 8));
+    };
+
+    // Accel (1 m/s² = 100 LSB)
+    out.accel_x = rd16(&buffer[0]) / 100.0;
+    out.accel_y = rd16(&buffer[2]) / 100.0;
+    out.accel_z = rd16(&buffer[4]) / 100.0;
+
+    // Mag (1 uT = 16 LSB)
+    out.mag_x = rd16(&buffer[6]) / 16.0;
+    out.mag_y = rd16(&buffer[8]) / 16.0;
+    out.mag_z = rd16(&buffer[10]) / 16.0;
+
+    // Gyro (1 dps = 16 LSB)
+    out.gyro_x = rd16(&buffer[12]) / 16.0;
+    out.gyro_y = rd16(&buffer[14]) / 16.0;
+    out.gyro_z = rd16(&buffer[16]) / 16.0;
+
+    // Euler (1 degree = 16 LSB)
+    out.euler_h = rd16(&buffer[18]) / 16.0;
+    out.euler_r = rd16(&buffer[20]) / 16.0;
+    out.euler_p = rd16(&buffer[22]) / 16.0;
+
+    // Quaternion (1 Q = 2^-14 LSB)
+    const double qscale = (1.0 / (1 << 14));
+    out.quat_w = rd16(&buffer[24]) * qscale;
+    out.quat_x = rd16(&buffer[26]) * qscale;
+    out.quat_y = rd16(&buffer[28]) * qscale;
+    out.quat_z = rd16(&buffer[30]) * qscale;
+
+    // Linear accel (1 m/s² = 100 LSB)
+    out.lin_x = rd16(&buffer[32]) / 100.0;
+    out.lin_y = rd16(&buffer[34]) / 100.0;
+    out.lin_z = rd16(&buffer[36]) / 100.0;
+
+    // Gravity (1 m/s² = 100 LSB)
+    out.grav_x = rd16(&buffer[38]) / 100.0;
+    out.grav_y = rd16(&buffer[40]) / 100.0;
+    out.grav_z = rd16(&buffer[42]) / 100.0;
+
+    // Temperature (1 LSB = 1 C)
+    out.temperature_c = (double)((int8_t)buffer[44]);
     return true;
 }
